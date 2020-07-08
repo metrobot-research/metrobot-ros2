@@ -9,7 +9,6 @@ project(hri_display)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  roslibjs
   rospy
   std_msgs
 )
