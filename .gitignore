@@ -53,3 +53,5 @@ cmake-build-debug
 .idea
 install
 log
+metrobot_*
+deps

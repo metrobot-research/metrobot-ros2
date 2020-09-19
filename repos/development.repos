@@ -1,0 +1,9 @@
+repositories:
+  metrobot_description:
+    type: git
+    url: https://github.com/metrobot-research/metrobot_description.git
+    version: development
+  metrobot_simulation:
+    type: git
+    url: https://github.com/metrobot-research/metrobot_simulation.git
+    version: development
