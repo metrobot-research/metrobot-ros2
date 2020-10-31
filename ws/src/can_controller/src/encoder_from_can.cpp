@@ -7,7 +7,6 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
-#include "geometry_msgs/Twist.h"
 
 // TODO: Install the following libraries:
 #include "ctre/Phoenix.h"
@@ -48,16 +47,13 @@ void drive(double left, double right)
 	talRght.Set(ControlMode::Velocity, right);
 }
 
-class TalonNode : public rclcpp::Node
+class PathfinderSubscriber : public rclcpp::Node
 {
   public:
-    TalonNode()
-    : Node("talon_interface") // TODO: Replace node name
+    PathfinderSubscriber()
+    : Node("pathfinder_subscriber") // TODO: Replace node name
     {
       subscription_ = this->create_subscription<tuple>("PLACEHOLDER_VELOCITY_TOPIC", 10, std::bind(&PathfinderSubscriber::topic_callback, this, _1));
-      left_encoder_publisher_ = this->create_publisher<geometry_msgs::Twist>("cmd_vel/left_wheel_encoder_position", 10)
-      right_encoder_publisher_ = this->create_publisher<geometry_msgs::Twist>("cmd_vel/right_wheel_encoder_position", 10)
-      timer_ = this->create_wall_timer(20ms, std::bind(&TalonNode::timer_callback, this)); //TODO: Change timer time.
     }
   //TODO: WARNING—CURRENTLY, THIS AUTOMATICALLY RUNS THE MOTORS WHENEVER THIS NODE IS RUNNING... JUST FYI.
   private:
@@ -67,22 +63,7 @@ class TalonNode : public rclcpp::Node
       double right_vel = get<1>msg;
       drive(left_vel, right_vel);
     }
-    
-    void timer_callback()
-    {
-      geometry_msgs::Twist left_encoder_out;
-      geometry_msgs::Twist right_encoder_out;
-      left_encoder_out.linear.x = talLeft.getSelectedSensorVelocity();
-      right_encoder_out.linear.x = talRight.getSelectedSensorVelocity();
-      left_encoder_publisher_->publish(left_encoder_out);
-      right_encoder_publisher_->publish(right_encoder_out);
-    }
-    rclcpp::Subscription<tuple>::SharedPtr subscription_;
-    rclcpp::TimerBase::SharedPtr timer_;
-    rclcpp::Publisher<geometry_msgs::Twist>::SharedPtr left_encoder_publisher_;
-    rclcpp::Publisher<geometry_msgs::Twist>::SharedPtr right_encoder_publisher_;
-    size_t count_;
-
+    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr subscription_;
 };
 
 int main(int argc, char ** argv) //TODO: Change node name, probably!
