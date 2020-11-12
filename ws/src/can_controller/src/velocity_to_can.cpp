@@ -30,12 +30,10 @@ talLeft.ConfigSelectedFeedbackSensor(...); // TODO: finish filling out, though i
 int kPIDLoopIdx = 0;
 int kTimeoutMs = 30;
 
-talLeft.Config_kF(kPIDLoopIdx, 0, kTimeoutMs); // TODO: Figure out PIDF values.
-talLeft.Config_kP(kPIDLoopIdx, 0, kTimeoutMs); // TODO: this might have to be moved to main, alongside the ConfigSelectedFeedbackSensor()
+talLeft.Config_kF(kPIDLoopIdx, 0, kTimeoutMs); // TODO: Tune PIDF values according to https://phoenix-documentation.readthedocs.io/en/latest/ch16_ClosedLoop.html.
+talLeft.Config_kP(kPIDLoopIdx, 0, kTimeoutMs); // CHECK WHILE TESTING: this might have to be moved to main, alongside the ConfigSelectedFeedbackSensor()
 talLeft.Config_kI(kPIDLoopIdx, 0, kTimeoutMs);
 talLeft.Config_kD(kPIDLoopIdx, 0, kTimeoutMs);
-
-// TODO: we will need to tune the velocity PIDF values according to https://phoenix-documentation.readthedocs.io/en/latest/ch16_ClosedLoop.html, probably.
 
 void initDrive()
 {
@@ -44,7 +42,7 @@ void initDrive()
 
 void drive(double left, double right)
 {
-	talLeft.Set(ControlMode::Velocity, left); // TODO: Update controlmode to be accurate
+	talLeft.Set(ControlMode::Velocity, left);
 	talRght.Set(ControlMode::Velocity, right);
 }
 
@@ -52,9 +50,9 @@ class TalonNode : public rclcpp::Node
 {
   public:
     TalonNode()
-    : Node("talon_interface") // TODO: Replace node name
+    : Node("talon_interface")
     {
-      subscription_ = this->create_subscription<tuple>("PLACEHOLDER_VELOCITY_TOPIC", 10, std::bind(&PathfinderSubscriber::topic_callback, this, _1));
+      motion_subscriber_ = this->create_subscription<tuple>("PLACEHOLDER_VELOCITY_TOPIC", 10, std::bind(&PathfinderSubscriber::topic_callback, this, _1));
       left_encoder_publisher_ = this->create_publisher<geometry_msgs::Twist>("cmd_vel/left_wheel_encoder_position", 10)
       right_encoder_publisher_ = this->create_publisher<geometry_msgs::Twist>("cmd_vel/right_wheel_encoder_position", 10)
       timer_ = this->create_wall_timer(20ms, std::bind(&TalonNode::timer_callback, this)); //TODO: Change timer time.
@@ -77,7 +75,7 @@ class TalonNode : public rclcpp::Node
       left_encoder_publisher_->publish(left_encoder_out);
       right_encoder_publisher_->publish(right_encoder_out);
     }
-    rclcpp::Subscription<tuple>::SharedPtr subscription_;
+    rclcpp::Subscription<tuple>::SharedPtr motion_subscriber_;
     rclcpp::TimerBase::SharedPtr timer_;
     rclcpp::Publisher<geometry_msgs::Twist>::SharedPtr left_encoder_publisher_;
     rclcpp::Publisher<geometry_msgs::Twist>::SharedPtr right_encoder_publisher_;
@@ -85,7 +83,7 @@ class TalonNode : public rclcpp::Node
 
 };
 
-int main(int argc, char ** argv) //TODO: Change node name, probably!
+int main(int argc, char ** argv)
 {
   std::string interface = "can0";
   ctre::phoenix::platform::can::SetCANInterface(interface.c_str()); 
