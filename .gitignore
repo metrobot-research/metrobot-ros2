@@ -1,3 +1,8 @@
+# MetroBot Workspace Structure
+*/build/
+*/install/
+*/log/
+
 # dependencies
 node_modules/
 .pnp
